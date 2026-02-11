@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mail Sender</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 2rem auto; background-color: #f4f4f9; padding: 20px; }
+        form { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: .5rem; font-weight: 600; color: #555; }
+
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+
+        button { width: 100%; background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background 0.3s; }
+        button:hover { background-color: #218838; }
+
+        .alert { padding: 1rem; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 1rem; text-align: center; }
+        .error-msg { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+
+        /* --- Stiluri noi pentru Validare --- */
+        .text-danger { color: #dc3545; font-size: 0.85em; margin-top: 4px; display: block; }
+        .is-invalid { border-color: #dc3545 !important; background-color: #fff8f8; }
+    </style>
+</head>
+<body>
+
+<h2>Trimite un Email</h2>
+
+<div th:if="${message}" class="alert" th:text="${message}"></div>
+<div th:if="${error}" class="alert error-msg" th:text="${error}"></div>
+
+<form th:action="@{/send-email}" th:object="${emailForm}" method="post">
+
+    <div class="form-group">
+        <label for="fromUser">De la (Nume sau Email):</label>
+        <input type="text"
+               th:field="*{fromUser}"
+               th:classappend="${#fields.hasErrors('fromUser')} ? 'is-invalid'"
+               placeholder="ex: Ion Popescu">
+        <span th:if="${#fields.hasErrors('fromUser')}" th:errors="*{fromUser}" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="to">Catre (Email destinatar):</label>
+        <input type="text"
+               th:field="*{to}"
+               th:classappend="${#fields.hasErrors('to')} ? 'is-invalid'"
+               placeholder="destinatar@exemplu.com">
+        <span th:if="${#fields.hasErrors('to')}" th:errors="*{to}" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="subject">Titlu (Subiect):</label>
+        <input type="text"
+               th:field="*{subject}"
+               th:classappend="${#fields.hasErrors('subject')} ? 'is-invalid'"
+               placeholder="Subiectul mesajului...">
+        <span th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="body">Continut:</label>
+        <textarea th:field="*{body}"
+                  rows="6"
+                  th:classappend="${#fields.hasErrors('body')} ? 'is-invalid'"
+                  placeholder="Scrie mesajul tau aici..."></textarea>
+        <span th:if="${#fields.hasErrors('body')}" th:errors="*{body}" class="text-danger"></span>
+    </div>
+
+    <button type="submit">Send</button>
+</form>
+
+</body>
+</html>
