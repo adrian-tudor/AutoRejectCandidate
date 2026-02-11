@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 
@@ -15,31 +17,53 @@ public class SpreadsheetService {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
-
     public List<EmailForm> processSpreadsheet(MultipartFile file, String customSubject, String customBody) throws Exception {
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter formatter = new DataFormatter();
 
+            Row headerRow = sheet.getRow(0);
+            if (headerRow == null) {
+                throw new Exception("The spreadsheet is empty or missing a header row.");
+            }
+
+            Map<String, Integer> columnMap = getColumnMapping(headerRow);
+
+            if (!columnMap.containsKey("email") || !columnMap.containsKey("status")) {
+                throw new Exception("Missing required columns. Please ensure 'Email' and 'Status' headers exist.");
+            }
+
             return StreamSupport.stream(sheet.spliterator(), false)
                     .skip(1)
-                    .filter(this::isValidRow)
-                    .filter(row -> "Reject".equalsIgnoreCase(formatter.formatCellValue(row.getCell(3))))
-                    .map(row -> convertToEmailForm(row, formatter, customSubject, customBody))
+                    .filter(row -> isValidRow(row, columnMap.get("email")))
+                    .filter(row -> "Reject".equalsIgnoreCase(formatter.formatCellValue(row.getCell(columnMap.get("status")))))
+                    .map(row -> convertToEmailForm(row, formatter, customSubject, customBody, columnMap))
                     .toList();
         }
     }
 
-    private boolean isValidRow(Row row) {
-        return row != null &&
-                row.getCell(1) != null &&
-                !row.getCell(1).toString().trim().isEmpty();
+    private Map<String, Integer> getColumnMapping(Row headerRow) {
+        Map<String, Integer> map = new HashMap<>();
+        for (Cell cell : headerRow) {
+            String header = cell.getStringCellValue().trim().toLowerCase();
+            if (header.contains("name")) map.put("name", cell.getColumnIndex());
+            else if (header.contains("email")) map.put("email", cell.getColumnIndex());
+            else if (header.contains("role")) map.put("role", cell.getColumnIndex());
+            else if (header.contains("status")) map.put("status", cell.getColumnIndex());
+        }
+        return map;
     }
 
-    private EmailForm convertToEmailForm(Row row, DataFormatter formatter, String subjectTemplate, String bodyTemplate) {
-        String name = formatter.formatCellValue(row.getCell(0));
-        String email = formatter.formatCellValue(row.getCell(1));
-        String role = formatter.formatCellValue(row.getCell(2));
+    private boolean isValidRow(Row row, int emailIdx) {
+        if (row == null) return false;
+        Cell emailCell = row.getCell(emailIdx);
+        return emailCell != null && !emailCell.toString().trim().isEmpty();
+    }
+
+    private EmailForm convertToEmailForm(Row row, DataFormatter formatter, String subjectTemplate, String bodyTemplate, Map<String, Integer> columnMap) {
+        String name = columnMap.containsKey("name") ? formatter.formatCellValue(row.getCell(columnMap.get("name"))) : "Candidate";
+        String email = formatter.formatCellValue(row.getCell(columnMap.get("email")));
+        String role = columnMap.containsKey("role") ? formatter.formatCellValue(row.getCell(columnMap.get("role"))) : "the position";
 
         EmailForm form = new EmailForm();
         form.setTo(email);
