@@ -27,8 +27,7 @@ The application requires specific environment settings to communicate with SendG
    cp src/main/resources/application.properties.example src/main/resources/application.properties
 
 
-   ### Spreadsheet Format
-
+### Spreadsheet Format
 The tool automatically detects data columns based on the header names in the first row. This allows for flexible spreadsheet structures where the order of columns does not matter.
 
 #### Column Requirements
