@@ -24,11 +24,11 @@ public class EmailService {
     public void sendEmail(String fromUser, String toEmail, String subject, String body) throws IOException {
 
 
-        Email from = new Email(myFromEmail, "Spring Mailing (" + fromUser + ")");
+        Email from = new Email(myFromEmail, fromUser);
 
         Email to = new Email(toEmail);
 
-        String finalBodyText = "Mesaj de la: " + fromUser + "\n\n" + body;
+        String finalBodyText = "Message from: " + fromUser + "\n\n" + body;
         Content content = new Content("text/plain", finalBodyText);
 
         Mail mail = new Mail(from, subject, to, content);
@@ -41,8 +41,9 @@ public class EmailService {
         request.setBody(mail.build());
 
         Response response = sg.api(request);
+
         if (response.getStatusCode() >= 400) {
-            throw new IOException("Eroare SendGrid (" + response.getStatusCode() + "): " + response.getBody());
+            throw new IOException("SendGrid Error (" + response.getStatusCode() + "): " + response.getBody());
         }
     }
 }

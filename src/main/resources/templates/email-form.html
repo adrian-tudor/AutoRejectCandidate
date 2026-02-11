@@ -1,74 +1,150 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Mail Sender</title>
+    <title>Rejection Tool</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 2rem auto; background-color: #f4f4f9; padding: 20px; }
-        form { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        .form-group { margin-bottom: 1.5rem; }
-        label { display: block; margin-bottom: .5rem; font-weight: 600; color: #555; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 650px; margin: 2rem auto; background-color: #f4f4f9; padding: 20px; }
+        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+        h2, h3 { color: #333; margin-top: 0; }
+        h2 { text-align: center; margin-bottom: 1.5rem; }
 
+        .selector-container { margin-bottom: 2rem; text-align: center; }
+        select { padding: 10px; width: 100%; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; background: white; cursor: pointer; }
+
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: .5rem; font-weight: 600; color: #555; }
         input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
 
-        button { width: 100%; background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background 0.3s; }
-        button:hover { background-color: #218838; }
+        .btn { width: 100%; color: white; padding: 12px; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; transition: opacity 0.3s; margin-top: 10px; }
+        .btn:hover { opacity: 0.9; }
+        .btn-primary { background-color: #007bff; }
 
-        .alert { padding: 1rem; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 1rem; text-align: center; }
-        .error-msg { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .alert { padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; text-align: center; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        /* --- Stiluri noi pentru Validare --- */
         .text-danger { color: #dc3545; font-size: 0.85em; margin-top: 4px; display: block; }
-        .is-invalid { border-color: #dc3545 !important; background-color: #fff8f8; }
+        .info-text { font-size: 0.85rem; color: #666; margin-bottom: 1rem; line-height: 1.4; }
+
+        /* Hidden by default */
+        .mode-section { display: none; }
+        /* Visible when active */
+        .active { display: block; animation: fadeIn 0.3s; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<h2>Trimite un Email</h2>
+<h2>Rejection Tool</h2>
 
-<div th:if="${message}" class="alert" th:text="${message}"></div>
-<div th:if="${error}" class="alert error-msg" th:text="${error}"></div>
+<div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+<div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-<form th:action="@{/send-email}" th:object="${emailForm}" method="post">
-
-    <div class="form-group">
-        <label for="fromUser">De la (Nume sau Email):</label>
-        <input type="text"
-               th:field="*{fromUser}"
-               th:classappend="${#fields.hasErrors('fromUser')} ? 'is-invalid'"
-               placeholder="ex: Ion Popescu">
-        <span th:if="${#fields.hasErrors('fromUser')}" th:errors="*{fromUser}" class="text-danger"></span>
+<div class="card">
+    <div class="selector-container">
+        <label for="modeSelector">Choose Action Mode:</label>
+        <select id="modeSelector" onchange="switchMode()">
+            <option value="single">Single Manual Email</option>
+            <option value="xlsx">Bulk Upload (.xlsx)</option>
+            <option value="text">Bulk Paste (Text List)</option>
+        </select>
     </div>
 
-    <div class="form-group">
-        <label for="to">Catre (Email destinatar):</label>
-        <input type="text"
-               th:field="*{to}"
-               th:classappend="${#fields.hasErrors('to')} ? 'is-invalid'"
-               placeholder="destinatar@exemplu.com">
-        <span th:if="${#fields.hasErrors('to')}" th:errors="*{to}" class="text-danger"></span>
+    <hr>
+
+    <div id="singleSection" class="mode-section active">
+        <h3>Send Single Email</h3>
+        <form th:action="@{/send-email}" th:object="${emailForm}" method="post">
+            <div class="form-group">
+                <label>From Name:</label>
+                <input type="text" th:field="*{fromUser}" required placeholder="Hiring Team">
+                <span th:if="${#fields.hasErrors('fromUser')}" th:errors="*{fromUser}" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label>To (Recipient Email):</label>
+                <input type="email" th:field="*{to}" required placeholder="candidate@example.com">
+                <span th:if="${#fields.hasErrors('to')}" th:errors="*{to}" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label>Subject:</label>
+                <input type="text" th:field="*{subject}" required>
+                <span th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label>Content:</label>
+                <textarea th:field="*{body}" rows="6" required></textarea>
+                <span th:if="${#fields.hasErrors('body')}" th:errors="*{body}" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Individual Email</button>
+        </form>
     </div>
 
-    <div class="form-group">
-        <label for="subject">Titlu (Subiect):</label>
-        <input type="text"
-               th:field="*{subject}"
-               th:classappend="${#fields.hasErrors('subject')} ? 'is-invalid'"
-               placeholder="Subiectul mesajului...">
-        <span th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}" class="text-danger"></span>
+    <div id="xlsxSection" class="mode-section">
+        <h3>Bulk Auto-Reject via Spreadsheet</h3>
+        <p class="info-text">
+            Upload your Excel file. Use <strong>{name}</strong> and <strong>{role}</strong> in your template to personalize the messages automatically.
+        </p>
+        <form th:action="@{/bulk-reject-xlsx}" th:object="${emailForm}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Sender Name:</label>
+                <input type="text" th:field="*{fromUser}" required>
+            </div>
+            <div class="form-group">
+                <label>Custom Template Subject:</label>
+                <input type="text" th:field="*{subject}" required placeholder="Update regarding {role}">
+            </div>
+            <div class="form-group">
+                <label>Custom Template Message:</label>
+                <textarea th:field="*{body}" rows="8" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Select Spreadsheet (.xlsx):</label>
+                <input type="file" name="file" accept=".xlsx" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Process and Send All</button>
+        </form>
     </div>
 
-    <div class="form-group">
-        <label for="body">Continut:</label>
-        <textarea th:field="*{body}"
-                  rows="6"
-                  th:classappend="${#fields.hasErrors('body')} ? 'is-invalid'"
-                  placeholder="Scrie mesajul tau aici..."></textarea>
-        <span th:if="${#fields.hasErrors('body')}" th:errors="*{body}" class="text-danger"></span>
+    <div id="textSection" class="mode-section">
+        <h3>Quick Reject (Bulk Text List)</h3>
+        <p class="info-text">Paste emails separated by commas, semicolons, or spaces. All recipients will receive the template below.</p>
+        <form th:action="@{/bulk-reject-text}" th:object="${emailForm}" method="post">
+            <div class="form-group">
+                <label>Sender Name:</label>
+                <input type="text" th:field="*{fromUser}" required>
+            </div>
+            <div class="form-group">
+                <label>Template Subject:</label>
+                <input type="text" th:field="*{subject}" required>
+            </div>
+            <div class="form-group">
+                <label>Template Message:</label>
+                <textarea th:field="*{body}" rows="5" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Email List:</label>
+                <textarea th:field="*{bulkEmails}" rows="6" placeholder="email1@test.com, email2@test.com..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send to All Recipients</button>
+        </form>
     </div>
+</div>
 
-    <button type="submit">Send</button>
-</form>
+<script>
+    function switchMode() {
+        const mode = document.getElementById('modeSelector').value;
+        const sections = document.querySelectorAll('.mode-section');
+
+        sections.forEach(section => {
+            section.classList.remove('active');
+        });
+
+        if (mode === 'single') document.getElementById('singleSection').classList.add('active');
+        if (mode === 'xlsx') document.getElementById('xlsxSection').classList.add('active');
+        if (mode === 'text') document.getElementById('textSection').classList.add('active');
+    }
+</script>
 
 </body>
 </html>

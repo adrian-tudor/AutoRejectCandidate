@@ -13,10 +13,10 @@ import java.util.stream.StreamSupport;
 @Service
 public class SpreadsheetService {
 
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
-    public List<EmailForm> processSpreadsheet(MultipartFile file) throws Exception {
+    // Added subject and body parameters here
+    public List<EmailForm> processSpreadsheet(MultipartFile file, String customSubject, String customBody) throws Exception {
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter formatter = new DataFormatter();
@@ -25,7 +25,7 @@ public class SpreadsheetService {
                     .skip(1)
                     .filter(this::isValidRow)
                     .filter(row -> "Reject".equalsIgnoreCase(formatter.formatCellValue(row.getCell(3))))
-                    .map(row -> convertToEmailForm(row, formatter))
+                    .map(row -> convertToEmailForm(row, formatter, customSubject, customBody))
                     .toList();
         }
     }
@@ -36,26 +36,26 @@ public class SpreadsheetService {
                 !row.getCell(1).toString().trim().isEmpty();
     }
 
-    private EmailForm convertToEmailForm(Row row, DataFormatter formatter) {
-        EmailForm form = new EmailForm();
-
+    private EmailForm convertToEmailForm(Row row, DataFormatter formatter, String subjectTemplate, String bodyTemplate) {
         String name = formatter.formatCellValue(row.getCell(0));
         String email = formatter.formatCellValue(row.getCell(1));
         String role = formatter.formatCellValue(row.getCell(2));
 
+        EmailForm form = new EmailForm();
         form.setTo(email);
         form.setFromUser("HR Department");
-        form.setSubject("Application Update: " + (role.isEmpty() ? "Your Application" : role));
-        form.setBody("Hi " + name + ",\n\nThank you for your interest. " +
-                "We've decided to move forward with other candidates at this time.");
+
+        String finalSubject = subjectTemplate.replace("{role}", role).replace("{name}", name);
+        String finalBody = bodyTemplate.replace("{name}", name).replace("{role}", role);
+
+        form.setSubject(finalSubject);
+        form.setBody(finalBody);
 
         return form;
     }
 
     public List<String> sanitizeEmailList(String rawEmails) {
-        if (rawEmails == null || rawEmails.isBlank()) {
-            return List.of();
-        }
+        if (rawEmails == null || rawEmails.isBlank()) return List.of();
 
         return Arrays.stream(rawEmails.split("[,;\\s]+"))
                 .map(String::trim)

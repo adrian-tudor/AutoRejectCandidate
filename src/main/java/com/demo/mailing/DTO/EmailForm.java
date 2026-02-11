@@ -6,19 +6,19 @@ import jakarta.validation.constraints.Size;
 
 public class EmailForm {
 
-    @NotBlank(message = "Te rugam sa introduci numele tau.")
+    @NotBlank(message = "Please enter your name.")
     private String fromUser;
 
-    @NotBlank(message = "Adresa de email este obligatorie.", groups = SingleSend.class)
-    @Email(message = "Te rugam să introduci o adresa de email valida.")
+    @NotBlank(message = "Recipient email address is required.", groups = SingleSend.class)
+    @Email(message = "Please enter a valid email address.")
     private String to;
 
-    @NotBlank(message = "Subiectul nu poate fi gol.")
-    @Size(min = 3, message = "Subiectul trebuie sa aiba minim 3 caractere.")
+    @NotBlank(message = "Subject cannot be empty.")
+    @Size(min = 3, message = "The subject must be at least 3 characters long.")
     private String subject;
 
-    @NotBlank(message = "Mesajul nu poate fi gol.")
-    @Size(max = 5000, message = "Mesajul este prea lung (max 5000 caractere).")
+    @NotBlank(message = "Message body cannot be empty.")
+    @Size(max = 5000, message = "The message is too long (maximum 5000 characters).")
     private String body;
 
     private String bulkEmails;
