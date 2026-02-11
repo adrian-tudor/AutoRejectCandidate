@@ -111,7 +111,7 @@ public class EmailController {
                                  BindingResult bindingResult,
                                  Model model) {
 
-        // We validate that they didn't clear the subject/body for the text list too
+
         if (bindingResult.hasFieldErrors("fromUser") || bindingResult.hasFieldErrors("subject") || bindingResult.hasFieldErrors("body")) {
             model.addAttribute("error", "Please fill in the template fields.");
             return "email-form";
