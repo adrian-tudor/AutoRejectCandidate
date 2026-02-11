@@ -1,0 +1,175 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+    --bg-color: #f8f9fc;
+    --card-bg: #ffffff;
+    --text-main: #2b2d42;
+    --text-muted: #8d99ae;
+    --border-color: #edf2f7;
+    --primary-color: #4361ee;
+    --primary-hover: #3a56d4;
+    --input-bg: #ffffff;
+    --error: #e63946;
+}
+
+[data-theme="dark"] {
+    --bg-color: #0b0e14;
+    --card-bg: #1a1f26;
+    --text-main: #f8f9fc;
+    --text-muted: #94a3b8;
+    --border-color: #2d3748;
+    --primary-color: #5d75f0;
+    --primary-hover: #7389f4;
+    --input-bg: #2d3748;
+}
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    transition: background-color 0.3s, color 0.3s;
+    margin: 0;
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+
+.card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.theme-switch {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    font-weight: 600;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.info-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: var(--bg-color);
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+
+input, textarea, select, .file-input {
+    display: block;
+    width: 100% !important;
+    padding: 12px;
+    background-color: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-main);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+}
+
+select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238d99ae'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+    appearance: none;
+}
+
+input[type="file"] {
+    padding: 8px;
+    line-height: 1.5;
+}
+
+.btn {
+    width: 100%;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn:hover {
+    background-color: var(--primary-hover);
+}
+
+
+.alert {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    text-align: center;
+    border: 1px solid transparent;
+}
+
+.alert-success { background: #e6fffa; color: #234e52; border-color: #b2f5ea; }
+[data-theme="dark"] .alert-success { background: #1a2e2b; color: #81e6d9; border-color: #285e5e; }
+
+.alert-error { background: #fff5f5; color: #822727; border-color: #feb2b2; }
+[data-theme="dark"] .alert-error { background: #2d1a1a; color: #fc8181; border-color: #631717; }
+
+.text-danger {
+    color: var(--error);
+    font-size: 0.8rem;
+    margin-top: 5px;
+    display: block;
+}
+
+
+.mode-section { display: none; }
+.active { display: block; animation: fadeIn 0.4s ease-out; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
