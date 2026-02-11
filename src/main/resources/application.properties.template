@@ -1,0 +1,11 @@
+# Application Settings
+spring.application.name=mailing
+server.port=8080
+
+# SendGrid Configuration
+# Get your API key from https://app.sendgrid.com/settings/api_keys
+spring.sendgrid.api-key=
+app.sendgrid.from-email=
+
+# Development Settings
+spring.thymeleaf.cache=false
