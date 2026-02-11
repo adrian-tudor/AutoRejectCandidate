@@ -25,3 +25,24 @@ The application requires specific environment settings to communicate with SendG
 1. Copy the template file:
    ```bash
    cp src/main/resources/application.properties.example src/main/resources/application.properties
+
+
+   ### Spreadsheet Format
+
+The tool automatically detects data columns based on the header names in the first row. This allows for flexible spreadsheet structures where the order of columns does not matter.
+
+#### Column Requirements
+| Header Name | Required | Purpose |
+| :--- | :--- | :--- |
+| **Email** | Yes | Recipient address for the rejection message. |
+| **Status** | Yes | Must contain the word "Reject" (case-insensitive) to trigger sending. |
+| **Name** | No | Used to replace `{name}` in your message template. Defaults to "Candidate". |
+| **Role** | No | Used to replace `{role}` in your template. Defaults to "the position". |
+
+#### Example Table
+| Status | Email | Name | Role |
+| :--- | :--- | :--- | :--- |
+| Reject | candidate@example.com | John Doe | Java Developer |
+| Selected | winner@example.com | Jane Smith | UI Designer |
+
+*Note: Any row where the Status is not "Reject" will be ignored by the tool.*
